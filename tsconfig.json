@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.base.json",
+  "include": [
+    "turbo.json"
+  ]
+}
+{
+  "": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "moduleResolution": "Bundler",
+    "lib": ["ES2020", "DOM"],
+    "paths": {}
+  }
+}
