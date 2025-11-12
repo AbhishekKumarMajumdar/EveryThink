@@ -75,11 +75,52 @@
 
  ## Environment Variables
 
- Backend reads `.env` via `dotenv`. Copy `apps/backend/.env.example` (create one if needed) and supply:
+Backend reads `.env` via `dotenv`. Copy `apps/backend/.env.example` (create one if needed) and supply:
  ```
  PORT=4000
+MONGODB_URI=mongodb://127.0.0.1:27017/chiku-commerce
+APP_URL=http://localhost:4000             # used to build email verification links
+EMAIL_VERIFICATION_OTP_TTL_MINUTES=10     # OTP expiry window (minutes)
+# Option 1: Generic SMTP server
+SMTP_HOST=smtp.resend.com
+SMTP_PORT=465
+SMTP_USER=apikey
+SMTP_PASS=super-secret
+SMTP_SECURE=true
+SMTP_FROM="Chiku Commerce <noreply@yourdomain.com>"
+
+# Option 2: Gmail (fallback if SMTP_* not set)
+EMAIL_USER=yourgmail@gmail.com
+EMAIL_PASS=app-password-generated-in-google-account
+EMAIL_FROM="Chiku Commerce <yourgmail@gmail.com>"
  ```
  Extend with database credentials, third-party API keys, etc., as you build out the platform.
+
+## Email Verification Flow
+
+1. **Register a user**
+   ```bash
+   curl -X POST http://localhost:4000/api/auth/register \
+     -H "Content-Type: application/json" \
+     -d '{
+       "name": "Priya Sharma",
+       "email": "priya@example.com",
+       "password": "Str0ngP@ssword!",
+       "platform": "android"
+     }'
+   ```
+   The response includes a `verificationUrl` (for convenience) and a message indicating that an OTP has been emailed to the user. The OTP itself is delivered via email using Nodemailer.
+
+2. **Verify with token + OTP**
+   ```bash
+   curl -X POST http://localhost:4000/api/auth/verify-email \
+     -H "Content-Type: application/json" \
+     -d '{
+       "token": "<64-char-token-from-verificationUrl>",
+       "otp": "<6-digit-code>"
+     }'
+   ```
+   A `200` response sets `isEmailVerified` to `true` for that user.
 
  ## Next Steps
 
